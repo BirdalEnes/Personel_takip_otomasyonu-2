@@ -1,0 +1,71 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Data.SqlClient;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace Personel_takip_otomasyonu
+{
+    public partial class frmPersonelEkle : Form
+    {
+        public frmPersonelEkle()
+        {
+            InitializeComponent();
+        }
+
+        private void frmPersonelEkle_Load(object sender, EventArgs e)
+        {
+            Personeller.ComboyaDepartmanGetir(cmbDepartman);
+
+        }
+
+        private void btncikis_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+        void Temizle()
+        {
+            dateTimePicker1.Value = DateTime.Now;
+            cmbDepartman.Text = "";
+            foreach (Control item in Controls)
+            {
+                if (item is TextBox)
+                {
+                    item.Text = "";
+                }
+            }
+        }
+        Personeller p = new Personeller();
+        Kullanicilar k = new Kullanicilar();
+        private void btnEkle_Click(object sender, EventArgs e)
+        {
+
+            p.Adi = txtPersonelAd.Text;
+            p.Soyadi = txtPersonelSoyad.Text;
+            p.Telefon = txtTelefon.Text;
+            p.Adres = txtAdres.Text;
+            p.Email = txtemail.Text;
+            p.DepartmanID = (int)cmbDepartman.SelectedValue;
+            p.Maasi = decimal.Parse(txtmaas.Text);
+            p.GirisTarihi = dateTimePicker1.Value;
+            p.Aciklama = txtAciklama.Text;
+            string sorgu = "insert into Personeller (Adi,Soyadi,Telefon,Adres,Email,DepartmanID,Maasi,GirisTarihi,Aciklama) values('" + p.Adi + "','" + p.Soyadi + "','" + p.Telefon + "','" + p.Adres + "','" + p.Email + "','" + p.DepartmanID + "',@Maasi,@GirisTarihi,'" + p.Aciklama + "')";
+            SqlCommand komut = new SqlCommand("", veritabani.baglanti);
+            komut.Parameters.Add("@Maasi", SqlDbType.Decimal).Value = p.Maasi;
+            komut.Parameters.Add("@GirisTarihi", SqlDbType.Date).Value = p.GirisTarihi;
+            veritabani.ESG(komut, sorgu);
+            Personeller.PersonelIDSonKayıt(p.PersonelID);
+            p.Islem = p.PersonelID + " nolu personel kaydı oluşturldu";
+            p.Aciklama = "Yeni personel ekleme";
+            Personeller.PersonelislemEkle(p, k);
+            Temizle();
+            MessageBox.Show("Kayıt Eklendi", "Kayıt", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+    }
+}
